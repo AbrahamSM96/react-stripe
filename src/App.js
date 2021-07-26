@@ -1,25 +1,52 @@
-import logo from './logo.svg';
-import './App.css';
+import "bootswatch/dist/lux/bootstrap.min.css";
+import { loadStripe } from "@stripe/stripe-js";
+import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
+
+const stripePromise = loadStripe("pk_test_SQFR2xXdf4XYuOEOW77GMyK8007GCzPuQh");
+
+const CheckoutForm = () => {
+    const stripe = useStripe();
+    const elements = useElements();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const { error, paymentMethod } = await stripe.createPaymentMethod({
+            type: "card",
+            card: elements.getElement(CardElement),
+        });
+        if (!error) {
+            console.log(paymentMethod);
+        }
+    };
+
+    return (
+        <form className="card card-body" onSubmit={handleSubmit}>
+            <img
+                src="https://m.media-amazon.com/images/I/71X-3musWkL._AC_SY450_.jpg"
+                alt="teclado"
+                className="img-fluid"
+            />
+            <div className="form-group">
+                <CardElement className="form-control" />
+            </div>
+
+            <button className="btn btn-success">Buy</button>
+        </form>
+    );
+};
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <Elements stripe={stripePromise}>
+            <div className="container p-4">
+                <div className="row">
+                    <div className="col-md-4 offset-md-4">
+                        <CheckoutForm />
+                    </div>
+                </div>
+            </div>
+        </Elements>
+    );
 }
 
 export default App;
