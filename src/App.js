@@ -1,10 +1,12 @@
 import "bootswatch/dist/lux/bootstrap.min.css";
 import { loadStripe } from "@stripe/stripe-js";
 import { CardElement, Elements, useElements, useStripe } from "@stripe/react-stripe-js";
-
-const stripePromise = loadStripe("pk_test_SQFR2xXdf4XYuOEOW77GMyK8007GCzPuQh");
+import { useState } from "react";
+const KEY_PRIVATE_STRIPE = process.env.REACT_APP_KEY_PRIVATE_STRIPE;
+const stripePromise = loadStripe(KEY_PRIVATE_STRIPE);
 
 const CheckoutForm = () => {
+    const [loading, setLoading] = useState(false);
     const stripe = useStripe();
     const elements = useElements();
 
@@ -14,8 +16,29 @@ const CheckoutForm = () => {
             type: "card",
             card: elements.getElement(CardElement),
         });
+        setLoading(true);
         if (!error) {
-            console.log(paymentMethod);
+            const { id } = paymentMethod;
+            let _data = {
+                id,
+                amount: 10000,
+            };
+            try {
+                await fetch("http://localhost:3001/api/checkout", {
+                    method: "POST",
+                    body: JSON.stringify(_data),
+                    headers: { "Content-type": "application/json; charset=UTF-8" },
+                })
+                    .then((response) => response.json())
+
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            } catch (error) {
+                console.log(error);
+            }
+            setLoading(false);
+            elements.getElement(CardElement).clear();
         }
     };
 
@@ -26,11 +49,22 @@ const CheckoutForm = () => {
                 alt="teclado"
                 className="img-fluid"
             />
+
+            <h3 className="text-center my-2">Price: $100</h3>
+
             <div className="form-group">
                 <CardElement className="form-control" />
             </div>
 
-            <button className="btn btn-success">Buy</button>
+            <button className="btn btn-success" disabled={!stripe}>
+                {loading ? (
+                    <div className="spinner-border text-light" role="status">
+                        <span className="sr-only"></span>
+                    </div>
+                ) : (
+                    "Buy"
+                )}
+            </button>
         </form>
     );
 };
