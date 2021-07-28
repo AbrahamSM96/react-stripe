@@ -9,4 +9,4 @@ In the project, the libraries used are:
 
 I simulate a little backend to send the data of stripe.
 
-![Screenshot](https://github.com/AbrahamSM96/react-stripe/tree/master/screenshots/react-stripe.png)
+![Screenshot](https://github.com/AbrahamSM96/react-stripe/blob/master/screenshots/react-stripe.png)
